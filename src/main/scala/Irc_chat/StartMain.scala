@@ -1,7 +1,15 @@
 package Irc_chat
 
-import Irc_chat.User.{JoinRoom, LeaveRoom, Message}
+import Irc_chat.ChatRoom.{JoinUser, PutMessage}
+import Irc_chat.User._
 import akka.actor.typed.{ActorRef, ActorSystem}
+import akka.cluster.Cluster
+import akka.cluster.typed.ClusterStateSubscription
+import akka.cluster.typed._
+import akka.cluster.ClusterEvent._
+import akka.cluster.MemberStatus
+import akka.actor.typed.pubsub.Topic
+import akka.actor.typed.pubsub._
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityRef, EntityTypeKey}
 import com.typesafe.config.{Config, ConfigFactory}
 import javafx.application.Application
@@ -20,38 +28,6 @@ object Launcher extends App {
   Application.launch(classOf[StartMain], args: _*)
 }
 
-//case class ClusterStart(portUser: Int, nameUser: String, controller: Controller) {
-//
-//
-//
-////  val UserNode: ActorSystem[User.Command] = ActorSystem(User("localhost", portUser), "ChatClusterSystem", config)
-//
-//  val RoomTypeKey: EntityTypeKey[ChatRoom.Command] = EntityTypeKey[ChatRoom.Command]("Chatroom")
-//  val sharding: ClusterSharding = ClusterSharding(UserNode)
-//  sharding.init(Entity(RoomTypeKey)(createBehavior = _ => ChatRoom()))
-//
-//  val user: ActorRef[User.Command] = UserNode.systemActorOf(User("localhost", portUser), nameUser)
-//
-//  val room: EntityRef[ChatRoom.Command] = sharding.entityRefFor(RoomTypeKey, "room")
-//
-//
-//  user ! JoinRoom(room)
-//
-//  /*   val mes = readLine()
-//
-//     user ! Message(room, mes)*/
-//
-//  controller.sendButton.setOnAction(event => controller.ButtonClicked(event))
-//
-//
-//}
-
-/*
-object ClusterStart1 extends ClusterStart(2551, "User_1")
-object ClusterStart2 extends ClusterStart(2652, "User_2")
-object ClusterStart3 extends ClusterStart(2753, "User_3")
-
-*/
 
 class StartMain extends Application {
 
@@ -63,7 +39,7 @@ class StartMain extends Application {
     val root = loader.load().asInstanceOf[SplitPane]
 
     val controller = loader.getController.asInstanceOf[Controller]
-    controller.startSystem("user-1", 2652)
+    controller.startSystem("user-2", 2652)
 
     primaryStage.setTitle("Chat Room")
     primaryStage.setScene(new Scene(root))
@@ -79,8 +55,9 @@ class Controller {
   @FXML var textArea: TextArea = _
   @FXML var textField: TextField = _
 
-  var ac: ActorSystem[User.Command] = _
-  var room: EntityRef[ChatRoom.Command] = _
+  var user: ActorRef[User.Command] = _
+  var room: ActorRef[ChatRoom.Command] = _
+
 
   def startSystem(userName: String, port: Int): Unit = {
     val config: Config = ConfigFactory.parseString(
@@ -89,26 +66,34 @@ class Controller {
          |""".stripMargin).withFallback(ConfigFactory.load())
 
 
-    ac = ActorSystem(User("localhost", port), "ChatClusterSystem", config)
+    val system = ActorSystem(User("localhost", port), "ChatClusterSystem", config)
+
+     user = system.systemActorOf(User("localhost", port), userName)
+     val cluster = Cluster(system)
 
 
-    val RoomTypeKey: EntityTypeKey[ChatRoom.Command] = EntityTypeKey[ChatRoom.Command]("Chatroom")
-    val sharding: ClusterSharding = ClusterSharding(ac)
-    sharding.init(Entity(RoomTypeKey)(createBehavior = _ => ChatRoom()))
+     room = system.systemActorOf(ChatRoom(), "room")
+
+    room ! JoinUser(user)
 
 
 
-    room = sharding.entityRefFor(RoomTypeKey, "room")
-
-    ac ! JoinRoom(room)
   }
+
 
   @FXML
   def ButtonClicked(actionEvent: ActionEvent): Unit = {
     val mes = textField.getText
-    ac ! Message(room, mes)
+
+    appendText(user, mes)
+    room ! PutMessage(user, mes)
 
 
   }
 
+  def appendText(user: ActorRef[User.Command], mes: String): Unit = {
+    textArea.appendText(s"${user.path.name}:  $mes \n")
+  }
+
 }
+
