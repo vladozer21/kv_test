@@ -3,7 +3,7 @@ import akka.serialization.jackson.JsonSerializable
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
 
-object ChatRoom extends Control {
+object ChatRoom  {
 
    sealed trait Command extends JsonSerializable
 
@@ -15,24 +15,16 @@ object ChatRoom extends Control {
 
 
 
-   def notJoined: Behavior[Command] = Behaviors.receive { (context, message) =>
+   def apply(): Behavior[Command] = Behaviors.receive { (context, message) =>
       message match {
          case Subscribe(user) =>
-
             println(s"User ${user.path.name} joined to ROOM: ${context.self.path.name}")
-            joined(user) // Переключаемся на поведение после входа в комнату
-         case _ =>
-            println("Received message before user joined the room.")
             Behaviors.same
-      }
-   }
-
-   def joined(user: ActorRef[User.Command]): Behavior[Command] = Behaviors.receive { (context, message) =>
-      message match {
 
          case Leave(user) =>
             println(s"User ${user.path.name} leaved ROOM: ${context.self.path.name}")
-            notJoined // Переключаемся на поведение до входа в комнату
+            Behaviors.same
+
          case putMessage(user, mes) =>
 
             println(s"${context.self.path.name} get MESSAGE:$mes from ${user.path.name}")
@@ -43,5 +35,5 @@ object ChatRoom extends Control {
       }
    }
 
-   def apply(): Behavior[Command] = notJoined
+
 }

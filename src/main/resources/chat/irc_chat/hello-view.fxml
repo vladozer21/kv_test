@@ -7,7 +7,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<SplitPane dividerPositions="0.257687165775401" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="Irc_chat.Control">
+<SplitPane dividerPositions="0.257687165775401" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="Irc_chat.Controller">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
          <children>
@@ -16,7 +16,7 @@
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
          <children>
             <TextField id="textField" fx:id="textField" layoutY="346.0" prefHeight="54.0" prefWidth="354.0" />
-            <Button fx:id="SendButton" layoutX="354.0" layoutY="347.0" mnemonicParsing="false" onAction="#ButtonClicked" prefHeight="54.0" prefWidth="86.0" text="Отправить" />
+            <Button fx:id="sendButton" layoutX="354.0" layoutY="347.0" mnemonicParsing="false" onAction="#ButtonClicked" prefHeight="54.0" prefWidth="86.0" text="Отправить" />
             <TextArea fx:id="textArea" layoutX="6.0" layoutY="6.0" prefHeight="330.0" prefWidth="426.0" />
          </children></AnchorPane>
   </items>
