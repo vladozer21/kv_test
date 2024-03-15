@@ -1,16 +1,8 @@
 package Irc_chat
 
 import Irc_chat.ChatRoom.{JoinUser, PutMessage}
-import Irc_chat.User._
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.cluster.Cluster
-import akka.cluster.typed.ClusterStateSubscription
-import akka.cluster.typed._
-import akka.cluster.ClusterEvent._
-import akka.cluster.MemberStatus
-import akka.actor.typed.pubsub.Topic
-import akka.actor.typed.pubsub._
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityRef, EntityTypeKey}
 import com.typesafe.config.{Config, ConfigFactory}
 import javafx.application.Application
 import javafx.event.{ActionEvent, EventHandler}
@@ -19,9 +11,6 @@ import javafx.scene.control.{Button, SplitPane, TextArea, TextField}
 import javafx.scene.Scene
 import javafx.stage.Stage
 
-import java.net.URL
-import java.util.ResourceBundle
-import scala.io.StdIn.readLine
 
 
 object Launcher extends App {
@@ -39,7 +28,7 @@ class StartMain extends Application {
     val root = loader.load().asInstanceOf[SplitPane]
 
     val controller = loader.getController.asInstanceOf[Controller]
-    controller.startSystem("user-2", 2652)
+    controller.startSystem("user-2", 2552)
 
     primaryStage.setTitle("Chat Room")
     primaryStage.setScene(new Scene(root))
@@ -66,15 +55,15 @@ class Controller {
          |""".stripMargin).withFallback(ConfigFactory.load())
 
 
-    val system = ActorSystem(User("localhost", port), "ChatClusterSystem", config)
+    val system = ActorSystem(User("localhost", port, this), "ChatClusterSystem", config)
 
-     user = system.systemActorOf(User("localhost", port), userName)
+     user = system.systemActorOf(User("localhost", port, this), userName)
      val cluster = Cluster(system)
 
 
      room = system.systemActorOf(ChatRoom(), "room")
 
-    room ! JoinUser(user)
+     room ! JoinUser(user)
 
 
 
@@ -84,15 +73,9 @@ class Controller {
   @FXML
   def ButtonClicked(actionEvent: ActionEvent): Unit = {
     val mes = textField.getText
-
-    appendText(user, mes)
     room ! PutMessage(user, mes)
 
 
-  }
-
-  def appendText(user: ActorRef[User.Command], mes: String): Unit = {
-    textArea.appendText(s"${user.path.name}:  $mes \n")
   }
 
 }
