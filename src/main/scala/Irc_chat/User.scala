@@ -1,4 +1,5 @@
 package Irc_chat
+
 import ChatRoom._
 import akka.actor.typed.pubsub.Topic
 import akka.serialization.jackson.JsonSerializable
@@ -11,15 +12,16 @@ import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.scene.control.TextArea
 
-import scala.collection.{SortedSet, immutable}
-
+import scala.collection.{SortedSet, immutable, mutable}
 
 
 object User {
   trait Command extends JsonSerializable
 
   case class JoinedUser(user: ActorRef[User.Command], members: List[Int]) extends Command
-  case class GetMessage(userAc: ActorRef[User.Command], mes: String ) extends Command
+
+  case class GetMessage(userAc: ActorRef[User.Command], mes: String) extends Command
+
   case class PrivateMessage(userAc: ActorRef[User.Command], mes: String, receiverName: String) extends Command
 
 
@@ -29,21 +31,11 @@ object User {
     Behaviors.receiveMessage {
 
       case JoinedUser(user, members) =>
-       /* //Platform.runLater(() => controller.user_but.setText(s"${user.path.name}"))
-        //Platform.runLater(() => controller.users_list.getChildren.add(controller.user_but))
-        val name = user.path.name
-        Platform.runLater(() => {
-          if (name == "user-1") controller.user1_but.setVisible(true)
-          if (name == "user-2") controller.user2_but.setVisible(true)
-          if (name == "user-3") controller.user3_but.setVisible(true)
-        })
-
-*/
         println(members.toString)
         Platform.runLater(() => {
-            controller.addUserButton(user.path.name, context.self.path.name)
-           controller.addAnotherUserButton(user.path.name, context.self.path.name, members, port)
-          controller.pubTextArea.appendText(s"${user.path.name}: joined \n")})
+          controller.addUserButton(user.path.name, context.self.path.name, members, port)
+          controller.pubTextArea.appendText(s"${user.path.name} joined \n")
+        })
         Behaviors.same
 
       case GetMessage(user, mes) =>
@@ -51,9 +43,24 @@ object User {
         controller.pubTextArea.appendText(s"${user.path.name}: $mes \n")
         Behaviors.same
       case PrivateMessage(user, mes, receiverName) =>
-        if (controller.userTextArea.getPromptText == receiverName) {
-        controller.userTextArea.appendText(s"${user.path.name}: $mes \n")}
+        if (context.self.path.name == user.path.name) {
+          println(controller.Areas.toString)
+          println(receiverName)
+          println(user.path.name + " send to " + receiverName)
+          controller.Areas.getOrElse(receiverName, null).appendText(s"${user.path.name}: $mes \n")
+          Behaviors.same
+        }
+        else if (context.self.path.name == receiverName) {
+          println(controller.Areas.toString)
+          println(user.path.name)
+          println("You have mes from " + user.path.name)
+          controller.Areas.getOrElse(user.path.name, null).appendText(s"${user.path.name}: $mes \n")
+          Behaviors.same
+        }
         Behaviors.same
+
     }
+
   }
+
 }

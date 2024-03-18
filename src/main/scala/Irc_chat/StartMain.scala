@@ -15,6 +15,8 @@ import javafx.stage.Stage
 
 import java.net.URL
 import java.util.ResourceBundle
+import scala.collection.mutable
+import scala.collection.mutable.Map
 
 
 
@@ -36,7 +38,7 @@ class StartMain extends Application {
 
 
     controller.startSystem("user-3", 2553)
-
+    Thread.sleep(5000)
     primaryStage.setTitle("Chat Room")
     primaryStage.setScene(new Scene(root))
 
@@ -54,7 +56,6 @@ class Controller {
   @FXML var users_list: VBox = _
 
   @FXML var pubTextArea: TextArea = _
-  var userTextArea: TextArea = _
 
   @FXML var sendButton: Button = _
   var user_but: Button = _
@@ -63,7 +64,10 @@ class Controller {
 
   @FXML var textField: TextField = _
 
+  var userGetTextArea: TextArea = _
+  var userSendTextArea: TextArea = _
 
+  val Areas: mutable.Map[String, TextArea] = mutable.Map()
 
 
 
@@ -99,49 +103,92 @@ class Controller {
   @FXML
   def ButtonClicked(actionEvent: ActionEvent): Unit = {
     val mes = textField.getText
-    if (anchorChat.getChildren.contains(pubTextArea)) {room ! PutMessage(user, mes)}
-    else if (!anchorChat.getChildren.contains(pubTextArea)) {
-      val receiveName = user_but.getText
+    room ! PutMessage(user, mes)
+
+   /* if (anchorChat.getChildren.contains(pubTextArea)) {room ! PutMessage(user, mes)}
+    else if (anchorChat.getChildren.contains(userTextArea)) {
+      val receiveName = userTextArea.getPromptText
       room ! PutPrivateMessage(user, mes, receiveName)
       println(s"${user.path.name} SEND $mes TO $receiveName")
-    }
+    }*/
   }
 
-  def addAnotherUserButton(anotherUserName: String, selfUserName: String, members: List[Int], selfPort: Int): Unit ={
-    if (anotherUserName == selfUserName) {
-      members.filter(port => port != selfPort).map(port =>
-                                                    {user_but = new Button(port.toString.replaceFirst("255", "user-"))
-                                                    users_list.getChildren.add(user_but)})
-    }
-  }
-  def addUserButton(anotherUserName: String, selfUserName: String): Unit = {
+
+  def addUserButton(anotherUserName: String, selfUserName: String, members: List[Int], selfPort: Int): Unit = {
+
+
     if (anotherUserName != selfUserName) {
       user_but = new Button(anotherUserName)
 
-      userTextArea = new TextArea()
+      var userTextArea = new TextArea()
+                          userTextArea.setLayoutX(6.0)
+                          userTextArea.setLayoutY(6.0)
+                          userTextArea.setPrefSize(426.0, 330.0)
+                          userTextArea.setPromptText(anotherUserName)
+                          Areas.put(anotherUserName, userTextArea)
+                          println(Areas.toString())
 
-      userTextArea.setLayoutX(6.0)
-      userTextArea.setLayoutY(6.0)
-      userTextArea.setPrefSize(426.0, 330.0)
-      userTextArea.setPromptText(s"$anotherUserName")
+      var send_but = new Button("Отправить")
+                          send_but.setLayoutX(354.0)
+                          send_but.setLayoutY(347.0)
+                          send_but.setMnemonicParsing(false)
+                          send_but.setPrefSize(86, 54)
+
+      var text_field = new TextField()
+                          text_field.setLayoutY(346.0)
+                          text_field.setPrefSize(354.0, 54.0)
+
+      send_but.setOnAction((actionEvent) => {
+        room ! PutPrivateMessage(user, text_field.getText, userTextArea.getPromptText)
+      })
 
       user_but.setOnAction((actionEvent) => {
         anchorChat.getChildren.clear()
-        anchorChat.getChildren.addAll(textField, sendButton, userTextArea)
+        anchorChat.getChildren.addAll(text_field, send_but, userTextArea)
         splitPane.getItems.set(1, anchorChat)
       })
-
       users_list.getChildren.add(user_but)
+    } else {
+      Thread.sleep(2000)
+      members.filter(port => port != selfPort).map(port => {
+        val portName = port.toString.replaceFirst("255", "user-")
+        user_but = new Button(portName)
+
+
+        var userTextArea = new TextArea()
+                          userTextArea.setLayoutX(6.0)
+                          userTextArea.setLayoutY(6.0)
+                          userTextArea.setPrefSize(426.0, 330.0)
+                          userTextArea.setPromptText(portName)
+                          Areas.put(portName, userTextArea)
+                          println(Areas.toString())
+
+
+        var send_but = new Button("Отправить")
+                        send_but.setLayoutX(354.0)
+                        send_but.setLayoutY(347.0)
+                        send_but.setMnemonicParsing(false)
+                        send_but.setPrefSize(86, 54)
+
+        var text_field = new TextField()
+                          text_field.setLayoutY(346.0)
+                          text_field.setPrefSize(354.0, 54.0)
+
+        send_but.setOnAction((actionEvent) => {
+          room ! PutPrivateMessage(user, text_field.getText, userTextArea.getPromptText)
+        })
+
+        user_but.setOnAction((actionEvent) => {
+          anchorChat.getChildren.clear()
+          anchorChat.getChildren.addAll(text_field, send_but, userTextArea)
+          splitPane.getItems.set(1, anchorChat)
+        })
+
+        users_list.getChildren.add(user_but)
+      })
     }
   }
 
-  /*@FXML
-  def User_buttonClicked(actionEvent: ActionEvent): Unit = {
-    anchorChat.getChildren.clear()
-    anchorChat.getChildren.addAll(textField, sendButton, userTextArea)
-    splitPane.getItems.set(1, anchorChat)
-
-  }*/
 
   @FXML
   def PublicButtonClicked(actionEvent: ActionEvent): Unit ={
@@ -151,11 +198,5 @@ class Controller {
 
   }
 
-  /*override def initialize(location: URL, resources: ResourceBundle): Unit = {
-
-    user1_but.setVisible(false)
-    user2_but.setVisible(false)
-    user3_but.setVisible(false)
-  }*/
 }
 
