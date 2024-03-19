@@ -11,7 +11,7 @@
   <items>
     <AnchorPane fx:id="anchorUsers" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
          <children>
-            <VBox fx:id="users_list" layoutX="6.0" layoutY="10.0" prefHeight="382.0" prefWidth="136.0">
+            <VBox fx:id="usersList" layoutX="6.0" layoutY="10.0" prefHeight="382.0" prefWidth="136.0">
                <children>
                    <Button fx:id="publicChat_but" mnemonicParsing="false" onAction="#PublicButtonClicked" prefHeight="26.0" prefWidth="138.0" text="Общий чат" />
 

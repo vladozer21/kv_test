@@ -20,6 +20,8 @@ object User {
 
   case class JoinedUser(user: ActorRef[User.Command], members: List[Int]) extends Command
 
+  case class LeaveUser(user: ActorRef[User.Command]) extends Command
+
   case class GetMessage(userAc: ActorRef[User.Command], mes: String) extends Command
 
   case class PrivateMessage(userAc: ActorRef[User.Command], mes: String, receiverName: String) extends Command
@@ -42,6 +44,14 @@ object User {
         println(s"${user.path.name}: $mes")
         controller.pubTextArea.appendText(s"${user.path.name}: $mes \n")
         Behaviors.same
+
+
+      case LeaveUser(user) =>
+        Platform.runLater(() => controller.deleteUser(user.path.name))
+        controller.pubTextArea.appendText(s"${user.path.name} leaved \n")
+
+        Behaviors.same
+
       case PrivateMessage(user, mes, receiverName) =>
         if (context.self.path.name == user.path.name) {
           println(controller.Areas.toString)
