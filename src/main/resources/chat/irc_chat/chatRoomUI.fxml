@@ -7,24 +7,31 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<SplitPane fx:id="splitPane" dividerPositions="0.2526737967914438" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Irc_chat.Controller">
-  <items>
-    <AnchorPane fx:id="anchorUsers" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-         <children>
-            <VBox fx:id="usersList" layoutX="6.0" layoutY="10.0" prefHeight="382.0" prefWidth="136.0">
-               <children>
-                   <Button fx:id="publicChat_but" mnemonicParsing="false" onAction="#PublicButtonClicked" prefHeight="26.0" prefWidth="138.0" text="Общий чат" />
+<SplitPane fx:id="splitPane" dividerPositions="0.2526737967914438" maxHeight="-Infinity" maxWidth="-Infinity"
+           minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
+           xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Irc_chat.Controller">
+    <items>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+            <children>
+                <VBox fx:id="usersList" layoutX="6.0" layoutY="10.0" prefHeight="382.0" prefWidth="136.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#PublicButtonClicked" prefHeight="26.0"
+                                prefWidth="138.0" text="Общий чат"/>
 
 
-               </children>
-            </VBox>
-         </children></AnchorPane>
-    <AnchorPane fx:id="anchorChat" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-         <children>
-            <TextField id="textField" fx:id="textField" layoutY="346.0" prefHeight="54.0" prefWidth="354.0" />
-            <Button fx:id="sendButton" layoutX="354.0" layoutY="347.0" mnemonicParsing="false" onAction="#ButtonClicked" prefHeight="54.0" prefWidth="86.0" text="Отправить" />
-             <TextArea fx:id="pubTextArea" layoutX="6.0" layoutY="6.0" prefHeight="330.0" prefWidth="426.0" promptText="общий чат" />
+                    </children>
+                </VBox>
+            </children>
+        </AnchorPane>
+        <AnchorPane fx:id="anchorChat" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+            <children>
+                <TextField id="textField" fx:id="textField" layoutY="346.0" prefHeight="54.0" prefWidth="354.0"/>
+                <Button fx:id="sendButton" layoutX="354.0" layoutY="347.0" mnemonicParsing="false"
+                        onAction="#buttonClicked" prefHeight="54.0" prefWidth="86.0" text="Отправить"/>
+                <TextArea fx:id="pubTextArea" layoutX="6.0" layoutY="6.0" prefHeight="330.0" prefWidth="426.0"
+                          promptText="общий чат"/>
 
-         </children></AnchorPane>
-  </items>
+            </children>
+        </AnchorPane>
+    </items>
 </SplitPane>
